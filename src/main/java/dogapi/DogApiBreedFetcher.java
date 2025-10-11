@@ -4,10 +4,12 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.prefs.BackingStoreException;
 
 /**
  * BreedFetcher implementation that relies on the dog.ceo API.
@@ -25,11 +27,39 @@ public class DogApiBreedFetcher implements BreedFetcher {
      */
     @Override
     public List<String> getSubBreeds(String breed) {
-        // TODO Task 1: Complete this method based on its provided documentation
-        //      and the documentation for the dog.ceo API. You may find it helpful
-        //      to refer to the examples of using OkHttpClient from the last lab,
-        //      as well as the code for parsing JSON responses.
-        // return statement included so that the starter code can compile and run.
-        return new ArrayList<>();
+        String url = "https://dog.ceo/api/breeds/list/all";
+        final Request request = new Request.Builder()
+                .url(url)
+                .build();
+        try (Response response = client.newCall(request).execute()) {
+
+            String jsonData = response.body().string();
+            JSONObject json = new JSONObject(jsonData);
+
+            //Check if it had worked
+            if (!json.getString("status").equalsIgnoreCase("success")) {
+                throw new BreedNotFoundException("API returned an error response.");
+            }
+
+            //get subclasses within it and check if it has the breed
+            JSONObject allBreeds = json.getJSONObject("message");
+
+            if (!allBreeds.has(breed.toLowerCase())) {
+                throw new BreedNotFoundException("Breed not found: " + breed);
+            }
+
+            JSONArray subBreedsArray = allBreeds.getJSONArray(breed.toLowerCase());
+            List<String> subBreedList = new ArrayList<>();
+
+            for (int i = 0; i < subBreedsArray.length(); i++) {
+                subBreedList.add(subBreedsArray.getString(i));
+            }
+
+            return subBreedList;
+
+
+        } catch (IOException | JSONException event){
+            throw new BreedNotFoundException("API returned no breeds found");
+
     }
-}
+}}
