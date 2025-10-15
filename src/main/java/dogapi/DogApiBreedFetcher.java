@@ -57,11 +57,10 @@ public class DogApiBreedFetcher implements BreedFetcher {
 
             return subBreedList;
 
-
-        } catch (IOException | JSONException event){
-            throw new BreedNotFoundException("No breeds found");
-
-    } catch (BreedNotFoundException e) {
-            throw new RuntimeException(e);
+        } catch (IOException e) {
+            throw new BreedNotFoundException("Error while fetching breeds", e);
+        } catch (Exception e) {
+            throw new BreedNotFoundException("Error parsing API", e);
         }
-    }}
+    }
+}
