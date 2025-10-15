@@ -35,7 +35,7 @@ public class Main {
             }
 
         } catch (BreedFetcher.BreedNotFoundException e){
-            return -1;
+            return 0;
         }
     }
 }
